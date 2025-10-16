@@ -23,8 +23,8 @@ final readonly class BoundedIntValue implements IInt
                 sprintf(
                     "Value %d not in range [%d, %d]",
                     $value,
-                    $range->min(),
-                    $range->max()
+                    $range->min()->toString(),
+                    $range->max()->toString()
                 )
             );
         }

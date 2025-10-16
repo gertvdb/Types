@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Gertvdb\Types\String;
 
-use Assert\InvalidArgumentException;
+use InvalidArgumentException;
 use Stringable;
 
 final class StringValue implements IString

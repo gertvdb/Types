@@ -54,12 +54,12 @@ final readonly class IntValue implements IInt, IString
         /**
          * Regex explanation:
          *
-         *  ^-?          → optional minus at the start
-         *  (0|[1-9]\d*) → either zero OR a non-zero digit followed by digits
-         *  $            → end of string
+         *  ^-?     → optional minus sign at the start
+         *  \d+     → one or more digits (allows leading zeros)
+         *  $       → end of string
          *
-         **/
-        if (!preg_match('/^-?([1-9]\d*)$/', $normalize->toString())) {
+         */
+        if (!preg_match('/^-?\d+$/', $normalize->toString())) {
             throw new InvalidArgumentException("Invalid integer format: {$normalize->toString()}");
         }
 

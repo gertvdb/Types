@@ -27,8 +27,8 @@ final readonly class BoundedStringValue implements IString
                 sprintf(
                     "Length of string %d not in range [%d, %d]",
                     $value,
-                    $range->min(),
-                    $range->max()
+                    $range->min()->toString(),
+                    $range->max()->toString()
                 )
             );
         }

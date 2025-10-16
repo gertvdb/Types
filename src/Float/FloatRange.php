@@ -18,7 +18,7 @@ final readonly class FloatRange
 
         if ($safeMin->toFloat() > $safeMax->toFloat()) {
             throw new InvalidArgumentException(
-                "Minimum value ({$safeMin}) cannot be greater than maximum value ({$safeMax})"
+                "Minimum value ({$safeMin->toFloat()}) cannot be greater than maximum value ({$safeMax->toFloat()})"
             );
         }
 
