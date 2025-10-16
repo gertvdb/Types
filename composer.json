@@ -1,0 +1,56 @@
+{
+    "name": "gertvdb/types",
+    "type": "library",
+    "description": "Expands Php’s native data types with modern, strongly-typed, and immutable value objects.",
+    "keywords": [
+        "Types"
+    ],
+    "homepage": "https://github.com/gertvdb/Types",
+    "license": "LGPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Gert van den Buijs",
+            "email": "gertvandenbuijs@hotmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "~8.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "phpbench/phpbench": "^1.1",
+        "phpstan/phpstan": "^1.9",
+        "symplify/easy-ci": "^11.1",
+        "symplify/easy-coding-standard": "^11.1",
+        "roave/security-advisories": "dev-latest"
+    },
+    "autoload": {
+        "psr-4": {
+            "Gertvdb\\Types\\": "src"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Gertvdb\\Types\\": "tests",
+            "Gertvdb\\Types\\Benchmarks\\": "benchmarks"
+        }
+    },
+    "scripts": {
+        "fix-style": [
+            "vendor/bin/ecs check --config ecs.php --fix"
+        ],
+        "check-style": [
+            "vendor/bin/ecs check --config ecs.php"
+        ],
+        "test": [
+            "vendor/bin/phpunit --testdox"
+        ],
+        "phpstan": [
+            "vendor/bin/phpstan analyse --memory-limit=-1 --ansi"
+        ]
+    }
+}
