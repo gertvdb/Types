@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Gertvdb\Types\DateTime;
 
+use Brick\DateTime\DateTimeException;
+use Brick\DateTime\Instant;
+use Brick\DateTime\LocalDateTime as InternalLocalDateTime;
+use Brick\DateTime\TimeZone as InternalTimeZone;
+use Brick\DateTime\TimeZoneRegion as InternalTimeZoneRegion;
+use Brick\DateTime\ZonedDateTime as InternalZonedDateTime;
+use DateTimeImmutable;
+use Error;
 use Gertvdb\Types\DateTime\Formats\DateTimeFormat;
 use Gertvdb\Types\DateTime\Formats\DateTimeLocaleFormat;
 use Gertvdb\Types\I18n\Locale;
 use Gertvdb\Types\String\IString;
 use Gertvdb\Types\String\StringValue;
-use Brick\DateTime\DateTimeException;
-use Brick\DateTime\Instant;
-use Brick\DateTime\LocalDateTime as InternalLocalDateTime;
-use Brick\DateTime\TimeZoneRegion as InternalTimeZoneRegion;
-use Brick\DateTime\ZonedDateTime as InternalZonedDateTime;
-use Brick\DateTime\TimeZone as InternalTimeZone;
-use DateTimeImmutable;
-use Error;
 use InvalidArgumentException;
 use Psr\Clock\ClockInterface;
 use Stringable;
@@ -32,16 +32,15 @@ final readonly class DateTime implements IString, IDateTime
     private InternalZonedDateTime $dateTime;
 
     private function __construct(
-         Timezone $timezone,
-         int $year,
-         int $month,
-         int $day,
-         int $hour,
-         int $minute,
-         int $second,
-         int $nanoSecond,
-    )
-    {
+        Timezone $timezone,
+        int $year,
+        int $month,
+        int $day,
+        int $hour,
+        int $minute,
+        int $second,
+        int $nanoSecond,
+    ) {
         $internalTimezone = self::parseTimezone($timezone);
         try {
             $passedDateTime = InternalZonedDateTime::of(
@@ -115,7 +114,7 @@ final readonly class DateTime implements IString, IDateTime
         if (!$value->endsWith($utcChar)) {
             throw new InvalidArgumentException(
                 sprintf(
-                'The value "%s" does not end with the "%s" identifier for UTC.',
+                    'The value "%s" does not end with the "%s" identifier for UTC.',
                     $casted,
                     $utcChar
                 )
@@ -148,7 +147,8 @@ final readonly class DateTime implements IString, IDateTime
         );
     }
 
-    public static function now(ClockInterface $clock): self {
+    public static function now(ClockInterface $clock): self
+    {
         return self::fromTimestamp(Timestamp::fromInt($clock->now()->getTimestamp()));
     }
 
@@ -170,7 +170,7 @@ final readonly class DateTime implements IString, IDateTime
         $pattern = $format->pattern();
         return match ($format) {
             DateTimeLocaleFormat::DATETIME_FULL => StringValue::fromString(
-                (static function($native) use ($formatter, $pattern) {
+                (static function ($native) use ($formatter, $pattern) {
                     $formatter->setPattern($pattern);
                     return $formatter->format($native);
                 })($native)
@@ -178,7 +178,8 @@ final readonly class DateTime implements IString, IDateTime
         };
     }
 
-    public function format(DateTimeFormat $format, Timezone $timezone) : StringValue {
+    public function format(DateTimeFormat $format, Timezone $timezone): StringValue
+    {
         $native = $this->dateTime->toNativeDateTime();
 
         /**
@@ -200,7 +201,7 @@ final readonly class DateTime implements IString, IDateTime
         $pattern = $format->pattern();
         return match ($format) {
             DateTimeFormat::DATETIME_ISO8601 => StringValue::fromString(
-                (static function($native) use ($formatter, $pattern) {
+                (static function ($native) use ($formatter, $pattern) {
                     $formatter->setPattern($pattern);
                     return $formatter->format($native);
                 })($native)
@@ -323,8 +324,7 @@ final readonly class DateTime implements IString, IDateTime
         int $hours = 0,
         int $minutes = 0,
         int $seconds = 0,
-    ): self
-    {
+    ): self {
         $transformed = $this->dateTime
             ->plusYears($years)
             ->plusMonths($months)
@@ -343,8 +343,7 @@ final readonly class DateTime implements IString, IDateTime
         int $hours = 0,
         int $minutes = 0,
         int $seconds = 0,
-    ): self
-    {
+    ): self {
         $transformed = $this->dateTime
             ->minusYears($years)
             ->minusMonths($months)
@@ -356,7 +355,7 @@ final readonly class DateTime implements IString, IDateTime
         return self::fromTimestamp(Timestamp::fromInt($transformed->getEpochSecond()));
     }
 
-    public function timestamp() : Timestamp
+    public function timestamp(): Timestamp
     {
         return Timestamp::fromInt($this->dateTime->getEpochSecond());
     }

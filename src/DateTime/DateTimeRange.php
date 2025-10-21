@@ -8,13 +8,11 @@ use InvalidArgumentException;
 
 final readonly class DateTimeRange
 {
-
     private DateTime $min;
     private DateTime $max;
 
     public function __construct(DateTime $min, DateTime $max)
     {
-
         if ($min->isAfter($max)) {
             throw new InvalidArgumentException(
                 "Minimum value ({$min->toString()}) cannot be greater than maximum value ({$max->toString()})"

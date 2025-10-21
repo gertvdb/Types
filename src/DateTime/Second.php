@@ -60,5 +60,4 @@ final readonly class Second implements IInt
     {
         return $this->value->toInt();
     }
-
 }

@@ -9,13 +9,11 @@ use InvalidArgumentException;
 
 final readonly class DateOnlyRange
 {
-
     private DateOnly $min;
     private DateOnly $max;
 
     public function __construct(DateOnly $min, DateOnly $max)
     {
-
         if ($min->isAfter($max)) {
             throw new InvalidArgumentException(
                 "Minimum value ({$min->toString()}) cannot be greater than maximum value ({$max->toString()})"

@@ -18,7 +18,6 @@ final readonly class Locale implements IString
     private function __construct(
         StringValue $value
     ) {
-
         /**
          * In PHP’s intl extension and in Symfony’s Intl component, locales must follow BCP 47 / RFC 5646 format
          * → which means they use underscores (_) instead of hyphens (-) in PHP’s implementation.

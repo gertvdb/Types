@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gertvdb\Types\Int;
 
+use Gertvdb\Types\Array\IHashable;
 use Gertvdb\Types\String\IString;
 use Gertvdb\Types\String\StringValue;
 use InvalidArgumentException;
@@ -11,7 +12,7 @@ use InvalidArgumentException;
 /**
  * Represents an native integer (between PHP_INT_MIN and PHP_INT_MAX).
  */
-final readonly class IntValue implements IInt, IString
+final readonly class IntValue implements IInt, IString, IHashable
 {
     public const int MIN = PHP_INT_MIN;
     public const int MAX = PHP_INT_MAX;
@@ -95,11 +96,16 @@ final readonly class IntValue implements IInt, IString
 
     public function toString(): string
     {
-       return $this->__toString();
+        return $this->__toString();
     }
 
-    public function __toString(): string {
+    public function __toString(): string
+    {
         return (string) $this->value;
     }
 
+    public function toHash(): string
+    {
+        return $this->__toString();
+    }
 }

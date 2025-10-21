@@ -16,8 +16,7 @@ final readonly class Language implements IString
 
     private function __construct(
         StringValue $value
-    )
-    {
+    ) {
         $length = $value->length();
         if ($length !== 2) {
             throw new InvalidArgumentException(sprintf(

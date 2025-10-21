@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Gertvdb\Types\String;
 
+use Gertvdb\Types\Array\IHashable;
 use InvalidArgumentException;
 use Stringable;
 
-final class StringValue implements IString
+final class StringValue implements IString, IHashable
 {
     /**
      * The list of characters that are considered "invisible" in strings.
@@ -49,7 +50,7 @@ final class StringValue implements IString
         return new self($casted);
     }
 
-    public function equals(self $other, bool $strict = TRUE): bool
+    public function equals(self $other, bool $strict = true): bool
     {
         if ($strict) {
             return $this->value === $other->value;
@@ -170,13 +171,13 @@ final class StringValue implements IString
         return str_ends_with($this->value, $casted);
     }
 
-    public function trimLeft(Stringable|string $trimString = " \n\r\t\v\0") : self
+    public function trimLeft(Stringable|string $trimString = " \n\r\t\v\0"): self
     {
         $newValue = ltrim($this->value, $trimString);
         return new self($newValue);
     }
 
-    public function trimRight(Stringable|string $trimString = " \n\r\t\v\0") : self
+    public function trimRight(Stringable|string $trimString = " \n\r\t\v\0"): self
     {
         $newValue = rtrim($this->value, $trimString);
         return new self($newValue);
@@ -216,5 +217,10 @@ final class StringValue implements IString
     public function __toString(): string
     {
         return $this->value;
+    }
+
+    public function toHash(): string
+    {
+        return $this->__toString();
     }
 }

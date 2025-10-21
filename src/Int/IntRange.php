@@ -38,8 +38,8 @@ final readonly class IntRange
     public static function fromString(?string $min, ?string $max): self
     {
         // When no min or no max, let constructor handle default logic to prevent repeating ourselves.
-        $safeMin = $min ? IntValue::fromString($min)->toInt() : NULL;
-        $safeMax = $max ? IntValue::fromString($max)->toInt() : NULL;
+        $safeMin = $min ? IntValue::fromString($min)->toInt() : null;
+        $safeMax = $max ? IntValue::fromString($max)->toInt() : null;
         return new self($safeMin, $safeMax);
     }
 

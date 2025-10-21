@@ -13,7 +13,7 @@ final readonly class FixedClock implements ClockInterface, IDateTime
 
     public function __construct(
         DateTime $now
-    ){
+    ) {
         $this->now = $now;
     }
 

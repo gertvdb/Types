@@ -7,7 +7,6 @@ namespace Gertvdb\Types\DateTime;
 use Gertvdb\Types\DateTime\Formats\DateOnlyFormat;
 use Gertvdb\Types\I18n\Locale;
 use PHPUnit\Framework\TestCase;
-use function EasyCI202307\dump;
 
 final class DateOnlyTest extends TestCase
 {

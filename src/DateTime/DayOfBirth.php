@@ -28,8 +28,7 @@ final readonly class DayOfBirth implements IDateTime
     public static function from(
         DateTime $dateTime,
         ClockInterface $clock,
-    ): self
-    {
+    ): self {
         return new self($dateTime, $clock);
     }
 

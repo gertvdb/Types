@@ -20,8 +20,7 @@ final readonly class NanoSecond implements IInt
 
     private function __construct(
         int $int
-    )
-    {
+    ) {
         $range = IntRange::create(self::MIN, self::MAX);
         $this->value = BoundedIntValue::create($int, $range);
     }

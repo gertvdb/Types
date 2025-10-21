@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Gertvdb\Types\DateTime;
 
-use PHPUnit\Framework\TestCase;
-use Gertvdb\Types\DateTime\YearAndMonth;
 use Gertvdb\Types\DateTime\DateOnly;
 use Gertvdb\Types\DateTime\Formats\YearAndMonthFormat;
 use Gertvdb\Types\DateTime\Formats\YearAndMonthLocaleFormat;
+use Gertvdb\Types\DateTime\YearAndMonth;
 use Gertvdb\Types\I18n\Locale;
+use PHPUnit\Framework\TestCase;
 
 final class YearAndMonthTest extends TestCase
 {

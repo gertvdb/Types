@@ -15,7 +15,8 @@ final readonly class YearsOfAge implements IInt
 
     private function __construct(int $months)
     {
-        $this->months = BoundedIntValue::create($months,
+        $this->months = BoundedIntValue::create(
+            $months,
             IntRange::create(0, PHP_INT_MAX)
         );
     }

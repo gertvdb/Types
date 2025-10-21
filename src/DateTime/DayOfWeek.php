@@ -6,9 +6,9 @@ namespace Gertvdb\Types\DateTime;
 
 use Gertvdb\Types\DateTime\Formats\DayOfWeekFormat;
 use Gertvdb\Types\DateTime\Formats\DayOfWeekLocaleFormat;
+use Gertvdb\Types\I18n\Locale;
 use Gertvdb\Types\Int\IInt;
 use Gertvdb\Types\Int\IntValue;
-use Gertvdb\Types\I18n\Locale;
 use Gertvdb\Types\String\StringValue;
 
 final readonly class DayOfWeek implements IInt
@@ -91,8 +91,7 @@ final readonly class DayOfWeek implements IInt
     public function formatLocale(
         DayOfWeekLocaleFormat $format,
         Locale $locale
-    ): StringValue
-    {
+    ): StringValue {
         $native = $this->dateTime->toDateTimeImmutable();
         $formatter = new \IntlDateFormatter(
             (string) $locale->toString(),
@@ -129,7 +128,6 @@ final readonly class DayOfWeek implements IInt
 
     public function toString(): string
     {
-       return $this->__toString();
+        return $this->__toString();
     }
-
 }

@@ -10,16 +10,16 @@ namespace Gertvdb\Types\DateTime\Formats;
 enum DayOfWeekLocaleFormat: string
 {
     /** Format as 1 letter (e.g., T) */
-    case ONE_LETTER  = 'ONE_LETTER';
+    case ONE_LETTER = 'ONE_LETTER';
 
     /** Format short (e.g., Tu) */
-    case SHORT       = 'SHORT';
+    case SHORT = 'SHORT';
 
     /** Format medium (e.g., Tue) */
-    case MEDIUM      = 'MEDIUM';
+    case MEDIUM = 'MEDIUM';
 
     /** Format full (e.g., Tuesday) */
-    case FULL        = 'FULL';
+    case FULL = 'FULL';
 
     public function pattern(): string
     {

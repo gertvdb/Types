@@ -6,13 +6,12 @@ namespace Gertvdb\Types\DateTime;
 
 use Gertvdb\Types\DateTime\Formats\TimeFormat;
 use Gertvdb\Types\DateTime\Formats\TimeLocaleFormat;
+use Gertvdb\Types\I18n\Locale;
 use Gertvdb\Types\Int\IntValue;
-use Gertvdb\Types\Language\Locale;
 use Gertvdb\Types\String\StringValue;
 
 final readonly class Time
 {
-
     private DateTime $dateTime;
 
     public Hour  $hour;
@@ -24,10 +23,10 @@ final readonly class Time
      * Static Constructors
      */
     private function __construct(
-         int $hour,
-         int $minute,
-         ?int $second = 0,
-         ?int $nanoSecond = 0
+        int $hour,
+        int $minute,
+        ?int $second = 0,
+        ?int $nanoSecond = 0
     ) {
         $this->hour = Hour::fromInt($hour);
         $this->minute = Minute::fromInt($minute);
@@ -36,7 +35,7 @@ final readonly class Time
 
         $this->dateTime = DateTime::from(
             timezone: Timezone::ETC_UTC,
-            year:2025,
+            year: 2025,
             month: 1,
             day: 1,
             hour: $hour,
@@ -60,8 +59,8 @@ final readonly class Time
         );
     }
 
-    public static function fromString(string $timeString): self {
-
+    public static function fromString(string $timeString): self
+    {
         // Split nano part if present
         $nanoSeconds = 0;
         if (str_contains($timeString, '.')) {
@@ -137,10 +136,10 @@ final readonly class Time
     public function toNanoseconds(): int
     {
         return (
-                ($this->hour->toInt() * 3600 +
-                    $this->minute->toInt() * 60 +
-                    $this->second->toInt()) * 1000
-            ) + $this->nanoSecond->toInt();
+            ($this->hour->toInt() * 3600 +
+                $this->minute->toInt() * 60 +
+                $this->second->toInt()) * 1000
+        ) + $this->nanoSecond->toInt();
     }
 
     /**
@@ -179,8 +178,7 @@ final readonly class Time
     public function formatLocale(
         TimeLocaleFormat $format,
         Locale $locale
-    ): StringValue
-    {
+    ): StringValue {
         $native = $this->dateTime->toDateTimeImmutable();
         $tz = Timezone::fromString($native->getTimezone()->getName());
 
@@ -194,13 +192,13 @@ final readonly class Time
 
         return match ($format) {
             TimeLocaleFormat::SHORT => StringValue::fromString(
-                (static function($locale, $native) use ($formatter) {
+                (static function ($locale, $native) use ($formatter) {
                     $formatter->setPattern(TimeLocaleFormat::SHORT->pattern($locale));
                     return $formatter->format($native);
                 })($locale, $native)
             ),
             TimeLocaleFormat::WITH_SECONDS => StringValue::fromString(
-                (static function($locale, $native) use ($formatter) {
+                (static function ($locale, $native) use ($formatter) {
                     $formatter->setPattern(TimeLocaleFormat::WITH_SECONDS->pattern($locale));
                     return $formatter->format($native);
                 })($locale, $native)

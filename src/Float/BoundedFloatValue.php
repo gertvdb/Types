@@ -11,7 +11,6 @@ use OutOfRangeException;
  */
 final readonly class BoundedFloatValue implements IFloat
 {
-
     private FloatValue $value;
     private FloatRange $range;
 
@@ -25,7 +24,8 @@ final readonly class BoundedFloatValue implements IFloat
                     $value,
                     $range->min()->toFloat(),
                     $range->max()->toFloat()
-                ), 0
+                ),
+                0
             );
         }
 

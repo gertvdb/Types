@@ -13,7 +13,6 @@ final readonly class BoundedDateTime
 
     private function __construct(DateTime $value, DateTimeRange $range)
     {
-
         if ($value->isBefore($range->min())) {
             throw new InvalidArgumentException(
                 "The datetime ({$value->toString()}) cannot fall before ({$range->min()->toString()})"

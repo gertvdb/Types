@@ -37,8 +37,8 @@ final readonly class FloatRange
     public static function fromString(?string $min, ?string $max): self
     {
         // When no min or no max, let constructor handle default logic to prevent repeating ourselves.
-        $safeMin = $min ? FloatValue::fromString($min)->toFloat() : NULL;
-        $safeMax = $max ? FloatValue::fromString($max)->toFloat() : NULL;
+        $safeMin = $min ? FloatValue::fromString($min)->toFloat() : null;
+        $safeMax = $max ? FloatValue::fromString($max)->toFloat() : null;
         return new self($safeMin, $safeMax);
     }
 

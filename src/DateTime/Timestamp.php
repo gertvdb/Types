@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Gertvdb\Types\DateTime;
 
+use DateTimeImmutable;
+use DateTimeZone;
 use Gertvdb\Types\Int\BoundedIntValue;
 use Gertvdb\Types\Int\IInt;
 use Gertvdb\Types\Int\IntRange;
 use Gertvdb\Types\Int\IntValue;
-use DateTimeImmutable;
-use DateTimeZone;
 
 final readonly class Timestamp implements IDateTime, IInt
 {
@@ -26,7 +26,8 @@ final readonly class Timestamp implements IDateTime, IInt
         $this->timezone = Timezone::ETC_UTC;
     }
 
-    public static function fromInt(int $int): self {
+    public static function fromInt(int $int): self
+    {
         return new self($int);
     }
 

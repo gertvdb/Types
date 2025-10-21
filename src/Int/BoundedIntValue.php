@@ -11,7 +11,6 @@ use OutOfRangeException;
  */
 final readonly class BoundedIntValue implements IInt
 {
-
     private IntValue $value;
     private IntRange $range;
 

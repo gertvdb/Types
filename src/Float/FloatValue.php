@@ -79,6 +79,6 @@ final readonly class FloatValue implements IFloat
 
     public function toFloat(): float
     {
-       return $this->value;
+        return $this->value;
     }
 }

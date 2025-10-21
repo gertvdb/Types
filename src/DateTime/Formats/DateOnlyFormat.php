@@ -7,8 +7,8 @@ namespace Gertvdb\Types\DateTime\Formats;
 /**
  * https://unicode-org.github.io/icu/userguide/format_parse/datetime/#date-field-symbol-table
  */
-enum DateOnlyFormat: string {
-
+enum DateOnlyFormat: string
+{
     /** ISO 8601 standard format (e.g., 2024-10-18) */
     case DATEONLY_ISO8601 = "DATEONLY_ISO8601";
 

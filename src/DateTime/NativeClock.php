@@ -13,7 +13,9 @@ use Psr\Clock\ClockInterface;
  */
 final readonly class NativeClock implements ClockInterface, IDateTime
 {
-    public function __construct(){}
+    public function __construct()
+    {
+    }
 
     /**
      * @throws \Exception

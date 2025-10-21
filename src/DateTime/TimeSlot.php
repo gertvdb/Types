@@ -9,15 +9,13 @@ use Gertvdb\Types\Int\Round;
 
 readonly class TimeSlot
 {
-
     public Time $start;
     public Time $end;
 
     private function __construct(
-         Time $start,
-         Time $end
-    )
-    {
+        Time $start,
+        Time $end
+    ) {
         if (!$start->isBefore($end)) {
             throw new \InvalidArgumentException(
                 'Start time must be before the end time.'
@@ -67,5 +65,4 @@ readonly class TimeSlot
             Round::HALF_ODD => IntValue::fromInt((int) round($nanoseconds->toInt() / 1_000_000_000, 0, PHP_ROUND_HALF_ODD)),
         };
     }
-
 }

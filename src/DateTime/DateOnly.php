@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Gertvdb\Types\DateTime;
 
-use Gertvdb\Types\DateTime\Formats\DateOnlyFormat;
-use Gertvdb\Types\DateTime\Formats\DateOnlyLocaleFormat;
-use Gertvdb\Types\I18n\Locale;
-use Gertvdb\Types\String\IString;
-use Gertvdb\Types\String\StringValue;
-
 use Brick\DateTime\DateTimeException;
 use Brick\DateTime\LocalDate as InternalDateOnly;
 use Error;
+use Gertvdb\Types\DateTime\Formats\DateOnlyFormat;
+use Gertvdb\Types\DateTime\Formats\DateOnlyLocaleFormat;
+
+use Gertvdb\Types\I18n\Locale;
+use Gertvdb\Types\String\IString;
+use Gertvdb\Types\String\StringValue;
 use Stringable;
 
 final readonly class DateOnly implements IString
@@ -28,8 +28,7 @@ final readonly class DateOnly implements IString
         int $year,
         int $month,
         int $day
-    )
-    {
+    ) {
         try {
             // Validate and create LocalDate (immutable)
             $this->dateOnly = InternalDateOnly::of(
@@ -75,8 +74,7 @@ final readonly class DateOnly implements IString
      */
     public static function fromIso(
         string|Stringable $iso
-    ): self
-    {
+    ): self {
         $casted = (string) $iso;
         $parsed = InternalDateOnly::parse($casted);
 
@@ -145,8 +143,8 @@ final readonly class DateOnly implements IString
         return false;
     }
 
-    public function formatLocale(DateOnlyLocaleFormat $format, Locale $locale): StringValue {
-
+    public function formatLocale(DateOnlyLocaleFormat $format, Locale $locale): StringValue
+    {
         /**
          * Internally, every DateOnly instance has a timezone because PHP's DateTime objects
          * always carry a timezone. Although DateOnly represents only a calendar day (without
@@ -171,7 +169,8 @@ final readonly class DateOnly implements IString
         return StringValue::fromString($formatter->format($this->dateOnly->toNativeDateTime()));
     }
 
-    public function format(DateOnlyFormat $format) : StringValue {
+    public function format(DateOnlyFormat $format): StringValue
+    {
         $native = $this->dateOnly->toNativeDateTime();
         $pattern = $format->pattern();
         return StringValue::fromString($native->format($pattern));

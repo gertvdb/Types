@@ -6,11 +6,11 @@ namespace Gertvdb\Types\DateTime;
 
 use Gertvdb\Types\DateTime\Formats\MonthFormat;
 use Gertvdb\Types\DateTime\Formats\MonthLocaleFormat;
+use Gertvdb\Types\I18n\Locale;
 use Gertvdb\Types\Int\BoundedIntValue;
 use Gertvdb\Types\Int\IInt;
 use Gertvdb\Types\Int\IntRange;
 use Gertvdb\Types\Int\IntValue;
-use Gertvdb\Types\I18n\Locale;
 use Gertvdb\Types\String\StringValue;
 
 final readonly class Month implements IInt
@@ -68,8 +68,7 @@ final readonly class Month implements IInt
     public function formatLocale(
         Locale $locale,
         MonthLocaleFormat $format
-    ): StringValue
-    {
+    ): StringValue {
         $native = $this->dateTime->toDateTimeImmutable();
         $tz = Timezone::fromString($native->getTimezone()->getName());
 

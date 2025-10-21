@@ -6,8 +6,8 @@ namespace Gertvdb\Types\DateTime;
 
 use InvalidArgumentException;
 
-readonly class TimeSchedule {
-
+readonly class TimeSchedule
+{
     /** @var TimeSlot[] */
     private array $slots;
 
@@ -36,7 +36,9 @@ readonly class TimeSchedule {
         // Add and sort by start time
         $newSlots = $this->slots;
         $newSlots[] = $slot;
-        usort($newSlots, static fn(TimeSlot $a, TimeSlot $b) =>
+        usort(
+            $newSlots,
+            static fn (TimeSlot $a, TimeSlot $b) =>
             $a->start->toNanoseconds() <=> $b->start->toNanoseconds()
         );
 
@@ -47,5 +49,4 @@ readonly class TimeSchedule {
     {
         return $this->slots;
     }
-
 }

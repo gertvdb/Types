@@ -69,7 +69,8 @@ final readonly class BooleanValue implements IBoolean
         return $this->__toString();
     }
 
-    public function __toString(): string {
+    public function __toString(): string
+    {
         return $this->value ? 'true' : 'false';
     }
 
@@ -85,6 +86,6 @@ final readonly class BooleanValue implements IBoolean
 
     public function toBool(): bool
     {
-       return $this->value;
+        return $this->value;
     }
 }

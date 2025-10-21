@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Gertvdb\Types\DateTime;
 
-use InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
-use Gertvdb\Types\DateTime\Year;
 use Gertvdb\Types\DateTime\DateOnly;
 use Gertvdb\Types\DateTime\Formats\YearFormat;
+use Gertvdb\Types\DateTime\Year;
+use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 
 final class YearTest extends TestCase
 {

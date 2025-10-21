@@ -81,8 +81,11 @@ final class DateTimeTest extends TestCase
         $past = DateTime::from(Timezone::ETC_UTC, 2000, 1, 1, 0, 0, 0);
         $future = DateTime::from(Timezone::ETC_UTC, 2100, 1, 1, 0, 0, 0);
 
-        $clock = new class implements ClockInterface {
-            public function now(): \DateTimeImmutable { return new \DateTimeImmutable('2025-01-01T00:00:00Z'); }
+        $clock = new class() implements ClockInterface {
+            public function now(): \DateTimeImmutable
+            {
+                return new \DateTimeImmutable('2025-01-01T00:00:00Z');
+            }
         };
 
         $this->assertTrue($past->isPast($clock));

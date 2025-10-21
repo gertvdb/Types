@@ -13,8 +13,13 @@ final class DayOfBirthTest extends TestCase
     private function fixedClock(string $isoUtc): ClockInterface
     {
         return new class($isoUtc) implements ClockInterface {
-            public function __construct(private string $isoUtc) {}
-            public function now(): \DateTimeImmutable { return new \DateTimeImmutable($this->isoUtc); }
+            public function __construct(private string $isoUtc)
+            {
+            }
+            public function now(): \DateTimeImmutable
+            {
+                return new \DateTimeImmutable($this->isoUtc);
+            }
         };
     }
 

@@ -6,10 +6,10 @@ namespace Gertvdb\Types\DateTime;
 
 use Gertvdb\Types\DateTime\Formats\YearAndMonthFormat;
 use Gertvdb\Types\DateTime\Formats\YearAndMonthLocaleFormat;
+use Gertvdb\Types\I18n\Locale;
 use Gertvdb\Types\Int\BoundedIntValue;
 use Gertvdb\Types\Int\IntRange;
 use Gertvdb\Types\Int\IntValue;
-use Gertvdb\Types\I18n\Locale;
 use Gertvdb\Types\String\StringValue;
 use IntlDateFormatter;
 
@@ -23,7 +23,7 @@ final readonly class YearAndMonth
     private function __construct(
         int $year,
         int $month
-    ){
+    ) {
         $this->year = Year::fromInt($year);
         $this->month = Month::fromInt($month);
 
@@ -91,8 +91,7 @@ final readonly class YearAndMonth
     public function formatLocale(
         Locale $locale,
         YearAndMonthLocaleFormat $format
-    ): StringValue
-    {
+    ): StringValue {
         $native = $this->dateTime->toDateTimeImmutable();
         $tz = Timezone::fromString($native->getTimezone()->getName());
 
