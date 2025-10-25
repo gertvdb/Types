@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Gertvdb\Types\String;
 
+use Gertvdb\Types\Array\IComparable;
 use Gertvdb\Types\Array\IHashable;
+use Gertvdb\Types\Array\IHashableComparable;
+use Gertvdb\Types\Order\Compare;
 use InvalidArgumentException;
 use Stringable;
 
-final class StringValue implements IString, IHashable
+final class StringValue implements IString, IHashableComparable
 {
     /**
      * The list of characters that are considered "invisible" in strings.
@@ -222,5 +225,19 @@ final class StringValue implements IString, IHashable
     public function toHash(): string
     {
         return $this->__toString();
+    }
+
+    public function compareTo(IComparable $other): Compare
+    {
+        if (!$other instanceof self) {
+            throw new InvalidArgumentException('Incompatible type for comparison, expected StringValue');
+        }
+
+        $cmp = strcmp($this->value, $other->value);
+        return match (true) {
+            $cmp < 0 => Compare::Less,
+            $cmp > 0 => Compare::Greater,
+            default => Compare::Equal,
+        };
     }
 }

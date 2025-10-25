@@ -43,6 +43,8 @@ final class SortedDictionary implements IArray
      */
     private Closure $comparator;
 
+    private ?Dictionary $sorted = null;
+
     /**
      * Support for 'int' and 'string'
      *
@@ -51,7 +53,7 @@ final class SortedDictionary implements IArray
      * @param mixed $key
      * @return IHashable
      */
-    private function normalizeKey(mixed $key): IHashableComparable
+    private function normalizeKey(mixed $key): IHashable
     {
         if (get_debug_type($key) === 'int') {
             $key = IntValue::fromInt($key);
@@ -62,6 +64,24 @@ final class SortedDictionary implements IArray
         }
 
         return $key;
+    }
+
+    private function sort(): void
+    {
+        $dict = Dictionary::empty($this->value->keyType, $this->value->valueType);
+        $pairs = array_values($this->value->toArray());
+
+        // Sort by values using the comparator
+        \usort($pairs, function (array $a, array $b): int {
+            return ($this->comparator)($a['value'], $b['value']);
+        });
+
+        foreach ($pairs as $pair) {
+            $dict = $dict->add($pair['key'], $pair['value']);
+        }
+
+        $this->sorted = $dict;
+        $this->value = $dict;
     }
 
     /**
@@ -113,11 +133,8 @@ final class SortedDictionary implements IArray
 
         $new = clone $this;
         $values = $this->value->add($normalizedKey, $value);
-
-        // Sort values with the comparator for stable order
-        \usort($values, $this->comparator);
-
         $new->value = $values;
+        $new->sorted = null;
         return $new;
     }
 
@@ -133,11 +150,8 @@ final class SortedDictionary implements IArray
 
         $new = clone $this;
         $values = $this->value->remove($normalizedKey);
-
-        // Sort values with the comparator for stable order
-        \usort($values, $this->comparator);
-
         $new->value = $values;
+        $new->sorted = null;
         return $new;
     }
 
@@ -160,6 +174,9 @@ final class SortedDictionary implements IArray
      */
     public function getIterator(): Traversable
     {
+        if ($this->sorted === null) {
+            $this->sort();
+        }
         return $this->value->getIterator();
     }
 
@@ -178,7 +195,16 @@ final class SortedDictionary implements IArray
      */
     public function toArrayValue(): ArrayValue
     {
-        return $this->value->toArrayValue();
+        if ($this->sorted === null) {
+            $this->sort();
+        }
+        // Transform underlying pair-structure into values-only array keyed by hash
+        $pairs = $this->sorted->toArray();
+        $valuesOnly = [];
+        foreach ($pairs as $hash => $pair) {
+            $valuesOnly[(string)$hash] = $pair['value'];
+        }
+        return ArrayValue::fromArray($valuesOnly);
     }
 
     /**
@@ -188,7 +214,15 @@ final class SortedDictionary implements IArray
      */
     public function toArray(): array
     {
-        return $this->value->toArray();
+        if ($this->sorted === null) {
+            $this->sort();
+        }
+        $pairs = $this->sorted->toArray();
+        $valuesOnly = [];
+        foreach ($pairs as $hash => $pair) {
+            $valuesOnly[(string)$hash] = $pair['value'];
+        }
+        return $valuesOnly;
     }
 
     /**
