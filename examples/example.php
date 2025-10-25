@@ -4,8 +4,7 @@ use Gertvdb\Types\Array\Array\FixedArray;
 use Gertvdb\Types\Array\Dictionary\Dictionary;
 use Gertvdb\Types\Array\HashSet\HashSet;
 use Gertvdb\Types\Int\IntValue;
-use Gertvdb\Types\Sorting\SortDirection;
-use Gertvdb\Types\Sorting\SortOrder;
+use Gertvdb\Types\Order\Direction;
 use Gertvdb\Types\String\StringValue;
 use Gertvdb\Types\Array\HashSet\ScalarHashSet;
 
@@ -18,7 +17,10 @@ $hashSet->add(IntValue::fromInt(2));
 echo $hashSet->toArrayValue()->key_exists(2);
 
 
-$hashMap = Dictionary::empty();
+$dict = new Dictionary('int', 'string');
+$dict->add(2, 'Hallo');
+$dict->add(2, 'Hallo');
+
 
 $hashMap->add(IntValue::fromInt(2), StringValue::fromString('Gert'));
 $hashMap->add(IntValue::fromInt(3), StringValue::fromString('Jos'));
@@ -37,9 +39,9 @@ $scalesHashSet->sort(function (int $a, int $b) {
 
 
 $scalesHashSet->sort(function (int $a, int $b) {
-   return SortDirection::apply(
-       SortOrder::fromComparison($a <=> $b),
-       SortDirection::DESC
+   return Direction::apply(
+       Sort::fromComparison($a <=> $b),
+       Direction::DESC
    );
 });
 

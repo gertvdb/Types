@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Gertvdb\Types\Array\Queue;
 
-use Gertvdb\Types\Array\ArrayValue;
 use PHPUnit\Framework\TestCase;
 use UnderflowException;
 

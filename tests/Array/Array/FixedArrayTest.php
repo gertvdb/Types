@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Gertvdb\Types\Array\Array;
 
-use Gertvdb\Types\Array\Array\FixedArray;
 use InvalidArgumentException;
 use OutOfRangeException;
 use PHPUnit\Framework\TestCase;

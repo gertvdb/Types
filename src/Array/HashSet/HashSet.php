@@ -7,7 +7,8 @@ namespace Gertvdb\Types\Array\HashSet;
 use Gertvdb\Types\Array\ArrayValue;
 use Gertvdb\Types\Array\IArray;
 use Gertvdb\Types\Array\IHashable;
-use Gertvdb\Types\Sorting\SortOrder;
+use Gertvdb\Types\Int\IntValue;
+use Gertvdb\Types\String\StringValue;
 use InvalidArgumentException;
 use Traversable;
 use function Gertvdb\Types\isOfType;
@@ -38,7 +39,28 @@ final class HashSet implements IArray
      * String representation of the enforced item type (e.g. class name implementing IHashable).
      * @var non-empty-string
      */
-    private string $type;
+    public readonly string $type;
+
+    /**
+     * Support for 'int' and 'string'
+     *
+     * Internally we cast them to IHashable.
+     *
+     * @param mixed $key
+     * @return IHashable
+     */
+    private function normalizeKey(mixed $key): IHashable
+    {
+        if (get_debug_type($key) === 'int') {
+            $key = IntValue::fromInt($key);
+        }
+
+        if (get_debug_type($key) === 'string') {
+            $key = StringValue::fromString($key);
+        }
+
+        return $key;
+    }
 
     /**
      * Private constructor. Use empty() or fromArray().
@@ -47,31 +69,10 @@ final class HashSet implements IArray
      * @param non-empty-string $type Expected type for all items (must implement IHashable).
      * @throws InvalidArgumentException If any element does not implement IHashable or match the type.
      */
-    private function __construct(array $items, string $type)
+    private function __construct(string $type)
     {
         $this->type = $type;
-
-        foreach ($items as $i => $item) {
-            if (!isOfType($item, IHashable::class)) {
-                throw new InvalidArgumentException(
-                    "Item at index {$i} must implement IHashable."
-                );
-            }
-            if (!isOfType($item, $type)) {
-                $actual = get_debug_type($item);
-                throw new InvalidArgumentException(
-                    "Invalid type at index {$i}: expected {$type}, got {$actual}."
-                );
-            }
-        }
-
-        // Use hash as keys to enforce uniqueness
-        $hashes = [];
-        foreach ($items as $item) {
-            $hashes[$item->toHash()] = $item;
-        }
-
-        $this->value = ArrayValue::fromArray($hashes);
+        $this->value = ArrayValue::fromArray([]);
     }
 
     /**
@@ -83,20 +84,7 @@ final class HashSet implements IArray
      */
     public static function empty(string $type): self
     {
-        return new self([], $type);
-    }
-
-    /**
-     * Creates a typed HashSet from a list of items.
-     *
-     * @template TT of IHashable
-     * @param list<TT> $items
-     * @param non-empty-string $type The expected type for all items.
-     * @return self<TT>
-     */
-    public static function fromArray(array $items, string $type): self
-    {
-        return new self($items, $type);
+        return new self($type);
     }
 
     /**
@@ -105,8 +93,11 @@ final class HashSet implements IArray
      * @param T $item
      * @return self<T>
      */
-    public function add(IHashable $item): self
+    public function add(IHashable|int|string $item): self
     {
+
+        $normalizedKey = $this->normalizeKey($item);
+
         if (!isOfType($item, $this->type)) {
             $actual = get_debug_type($item);
             throw new InvalidArgumentException(
@@ -114,10 +105,19 @@ final class HashSet implements IArray
             );
         }
 
-        $values = $this->value->toArray();
-        $values[$item->toHash()] = $item;
+        if (!isOfType($item, IHashable::class)) {
+            throw new InvalidArgumentException(
+                "Item at must implement IHashable."
+            );
+        }
 
-        return new self(array_values($values), $this->type);
+
+        $new = clone $this;
+        $data = $this->value->toArray();
+        $data[$normalizedKey->toHash()] = $item;
+
+        $new->value = ArrayValue::fromArray($data);
+        return $new;
     }
 
     /**
@@ -126,8 +126,10 @@ final class HashSet implements IArray
      * @param T $item
      * @return self<T>
      */
-    public function remove(IHashable $item): self
+    public function remove(IHashable|int|string $item): self
     {
+        $normalizedKey = $this->normalizeKey($item);
+
         if (!isOfType($item, $this->type)) {
             $actual = get_debug_type($item);
             throw new InvalidArgumentException(
@@ -135,12 +137,14 @@ final class HashSet implements IArray
             );
         }
 
-        $values = $this->value->toArray();
-        if ($this->has($item)) {
-            unset($values[$item->toHash()]);
+        $new = clone $this;
+        $data = $this->value->toArray();
+        if ($this->has($normalizedKey)) {
+            unset($data[$normalizedKey->toHash()]);
         }
 
-        return new self(array_values($values), $this->type);
+        $new->value = ArrayValue::fromArray($data);
+        return $new;
     }
 
     /**
@@ -148,30 +152,10 @@ final class HashSet implements IArray
      *
      * @param T $item
      */
-    public function has(IHashable $item): bool
+    public function has(IHashable|int|string $item): bool
     {
-        return $this->value->key_exists($item->toHash());
-    }
-
-    /**
-     * Sorts the set items using the provided comparator and returns a new set.
-     * The comparator may return an int (-1,0,1) or a SortOrder instance.
-     *
-     * @param callable(IHashable, IHashable): (int|SortOrder) $comparator
-     * @return self<T>
-     */
-    public function sort(callable $comparator): self
-    {
-        $values = array_values($this->value->toArray());
-        \usort($values, static function (IHashable $a, IHashable $b) use ($comparator): int {
-            $result = $comparator($a, $b);
-            if ($result instanceof SortOrder) {
-                return $result->value();
-            }
-            return (int) $result;
-        });
-
-        return new self($values, $this->type);
+        $normalizedKey = $this->normalizeKey($item);
+        return $this->value->key_exists($normalizedKey->toHash());
     }
 
     /**
@@ -188,9 +172,10 @@ final class HashSet implements IArray
             );
         }
 
+        $new = clone $this;
         $values = array_merge($this->value->toArray(), $other->value->toArray());
-
-        return new self(array_values($values), $this->type);
+        $new->value = ArrayValue::fromArray($values);
+        return $new;
     }
 
     /**
@@ -211,10 +196,10 @@ final class HashSet implements IArray
      */
     public function map(callable $callback): self
     {
-        $new = array_map($callback, $this->value->toArray());
+        $values = array_map($callback, $this->value->toArray());
 
         // Validate the resulting types
-        foreach ($new as $i => $item) {
+        foreach ($values as $i => $item) {
             if (!isOfType($item, $this->type)) {
                 $actual = get_debug_type($item);
                 throw new InvalidArgumentException(
@@ -223,7 +208,9 @@ final class HashSet implements IArray
             }
         }
 
-        return new self($new, $this->type);
+        $new = clone $this;
+        $new->value = ArrayValue::fromArray($values);
+        return $new;
     }
 
     /**

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Gertvdb\Types\Array;
 
-use Gertvdb\Types\Sorting\SortOrder;
+use Gertvdb\Types\Order\Compare;
+use Gertvdb\Types\Order\Sort;
 use Traversable;
 
 /**
@@ -282,27 +283,5 @@ final readonly class ArrayValue implements IArray
     public function reverse(): self
     {
         return new self(array_reverse($this->value));
-    }
-
-    /**
-     * Sorts the array using the provided comparator while preserving keys.
-     *
-     * The comparator should return either an int (-1, 0, 1) like a standard PHP comparator,
-     * or an instance of SortOrder. The method is immutable and returns a new instance.
-     *
-     * @param callable(mixed, mixed): (int|SortOrder) $comparator
-     */
-    public function sort(callable $comparator): self
-    {
-        $arr = $this->value;
-        \uasort($arr, static function ($a, $b) use ($comparator): int {
-            $result = $comparator($a, $b);
-            if ($result instanceof SortOrder) {
-                return $result->value();
-            }
-            return (int) $result;
-        });
-
-        return new self($arr);
     }
 }

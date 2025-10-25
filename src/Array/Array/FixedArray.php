@@ -14,8 +14,6 @@ use function Gertvdb\Types\isOfType;
 /**
  * Class FixedArray
  *
- * (because Array is reserved keyword in PHP)
- *
  * Represents a fixed-size, ordered collection of values.
  * Once created, its length cannot change. All elements must be
  * of the same type. Elements can be accessed and replaced by index.

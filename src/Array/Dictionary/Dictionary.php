@@ -7,6 +7,8 @@ namespace Gertvdb\Types\Array\Dictionary;
 use Gertvdb\Types\Array\ArrayValue;
 use Gertvdb\Types\Array\IArray;
 use Gertvdb\Types\Array\IHashable;
+use Gertvdb\Types\Int\IntValue;
+use Gertvdb\Types\String\StringValue;
 use InvalidArgumentException;
 use Traversable;
 use function Gertvdb\Types\isOfType;
@@ -21,102 +23,115 @@ use function Gertvdb\Types\isOfType;
  * to allow efficient lookups. Iteration yields the original key objects
  * as keys and their corresponding values.
  *
- * @template K of IHashable
- * @template V
- * @implements IArray<V>
+ * @template TKey of IHashable
+ * @template TValue of mixed
+ * @implements IArray<TValue>
  */
 final class Dictionary implements IArray
 {
     /**
      * Underlying storage keyed by key hash.
      *
-     * @var ArrayValue<array<string, array{key: K, value: V}>>
+     * @var ArrayValue<array<string, array{key: TKey, value: TValue}>>
      */
     private ArrayValue $value;
 
     /** @var non-empty-string */
-    private string $keyType;
+    public readonly string $keyType;
 
     /** @var non-empty-string */
-    private string $valueType;
+    public readonly string $valueType;
 
     /**
-     * Private constructor. Use empty() to create a new dictionary.
+     * Support for 'int' and 'string'
      *
-     * @param array<string, array{key: K, value: V}> $items Normalized storage keyed by key hash.
+     * Internally we cast them to IHashable.
+     *
+     * @param mixed $key
+     * @return IHashable
+     */
+    private function normalizeKey(mixed $key): IHashable
+    {
+        if (get_debug_type($key) === 'int') {
+            $key = IntValue::fromInt($key);
+        }
+
+        if (get_debug_type($key) === 'string') {
+            $key = StringValue::fromString($key);
+        }
+
+        return $key;
+    }
+
+    private function normalizeKeyType(string $keyType): string
+    {
+        if ($keyType === 'int') {
+            $keyType = IntValue::class;
+        }
+
+        if ($keyType === 'string') {
+            $keyType = StringValue::class;
+        }
+
+        return $keyType;
+    }
+
+    /**
+     * Private constructor.
+     *
      * @param non-empty-string $keyType Expected key type (must implement IHashable)
      * @param non-empty-string $valueType Expected value type
      */
-    private function __construct(array $items, string $keyType, string $valueType)
+    public function __construct(string $keyType, string $valueType)
     {
         $this->keyType = $keyType;
         $this->valueType = $valueType;
-
-        // Validate keys and values
-        foreach ($items as $key => $value) {
-            if (!isOfType($key, $keyType)) {
-                $actual = get_debug_type($key);
-                throw new InvalidArgumentException("Invalid key type: expected {$keyType}, got {$actual}");
-            }
-
-            if (!isOfType($value, $valueType)) {
-                $actual = get_debug_type($value);
-                throw new InvalidArgumentException("Invalid value type: expected {$valueType}, got {$actual}");
-            }
-
-            if (!($key instanceof IHashable)) {
-                throw new InvalidArgumentException("Key must implement " . IHashable::class);
-            }
-        }
-
-        // Normalize using key hashes
-        $normalized = [];
-        foreach ($items as $key => $value) {
-            /** @var IHashable $key */
-            $normalized[$key->toHash()] = ['key' => $key, 'value' => $value];
-        }
-
-        $this->value = ArrayValue::fromArray($normalized);
+        $this->value = ArrayValue::fromArray([]);
     }
 
     /**
      * Creates an empty, typed dictionary.
      *
-     * @template KK of IHashable
-     * @param class-string<KK> $keyType
-     * @param non-empty-string $valueType
-     * @return self<KK, mixed>
+     * @param non-empty-string $keyType Fully-qualified class-string of the key type.
+     * @param non-empty-string $valueType PHPStan type string of the value type.
+     * @return self<TKey, TValue>
      */
     public static function empty(string $keyType, string $valueType): self
     {
-        return new self([], $keyType, $valueType);
+        return new self($keyType, $valueType);
     }
 
     /**
      * Adds or replaces a value for the given key and returns a new dictionary.
      *
-     * @param K $key
-     * @param V $value
-     * @return self<K, V>
+     * @param IHashable|int|string $key
+     * @param TValue $value
+     * @return self<TKey, TValue>
      */
-    public function add(IHashable $key, mixed $value): self
+    public function add(IHashable|int|string $key, mixed $value): self
     {
+        $normalizedKeyType = $this->normalizeKeyType($this->keyType);
+        $normalizedKey = $this->normalizeKey($key);
+
         if (!isOfType($value, $this->valueType)) {
             $actual = get_debug_type($value);
             throw new InvalidArgumentException("Invalid value type: expected {$this->valueType}, got {$actual}");
         }
 
-        if (!isOfType($key, $this->keyType)) {
-            $actual = get_debug_type($key);
-            throw new InvalidArgumentException("Invalid key type: expected {$this->keyType}, got {$actual}");
+        if (!isOfType($normalizedKey, $normalizedKeyType)) {
+            $actual = get_debug_type($normalizedKey);
+            throw new InvalidArgumentException("Invalid key type: expected {$normalizedKeyType}, got {$actual}");
+        }
+
+        if (!($key instanceof IHashable)) {
+            throw new InvalidArgumentException("Key must implement " . IHashable::class);
         }
 
         $new = clone $this;
         $data = $this->value->toArray();
+        $data[$normalizedKey->toHash()] = ['key' => $key, 'value' => $value];
 
-        $data[$key->toHash()] = ['key' => $key, 'value' => $value];
         $new->value = ArrayValue::fromArray($data);
-
         return $new;
     }
 
@@ -124,15 +139,17 @@ final class Dictionary implements IArray
      * Removes a key from the dictionary and returns a new dictionary.
      * If the key does not exist, this is a no-op.
      *
-     * @param K $key
-     * @return self<K, V>
+     * @param IHashable|int|string $key
+     * @return self<TKey, TValue>
      */
-    public function remove(IHashable $key): self
+    public function remove(IHashable|int|string $key): self
     {
         $new = clone $this;
         $data = $this->value->toArray();
 
-        unset($data[$key->toHash()]);
+        $normalizedKey = $this->normalizeKey($key);
+
+        unset($data[$normalizedKey->toHash()]);
         $new->value = ArrayValue::fromArray($data);
 
         return $new;
@@ -141,14 +158,16 @@ final class Dictionary implements IArray
     /**
      * Returns the value for a given key.
      *
-     * @param K $key
-     * @return V
+     * @param TKey $key
+     * @return TValue
      * @throws InvalidArgumentException If the key is not present.
      */
-    public function get(IHashable $key): mixed
+    public function get(IHashable|int|string $key): mixed
     {
         $data = $this->value->toArray();
-        $hash = $key->toHash();
+
+        $normalizedKey = $this->normalizeKey($key);
+        $hash = $normalizedKey->toHash();
 
         if (!isset($data[$hash])) {
             throw new InvalidArgumentException("Key not found in dictionary.");
@@ -160,15 +179,19 @@ final class Dictionary implements IArray
     /**
      * Checks if a key exists in the dictionary.
      *
-     * @param K $key
+     * @param TKey $key
+     * @return bool
      */
-    public function has(IHashable $key): bool
+    public function has(IHashable|int|string $key): bool
     {
-        return isset($this->value->toArray()[$key->toHash()]);
+        $normalizedKey = $this->normalizeKey($key);
+        return isset($this->value->toArray()[$normalizedKey->toHash()]);
     }
 
     /**
-     * @return Traversable<K, V>
+     * Iterator over the dictionary yielding original keys and their values.
+     *
+     * @return Traversable<TKey, TValue>
      */
     public function getIterator(): Traversable
     {
@@ -178,7 +201,7 @@ final class Dictionary implements IArray
     }
 
     /**
-     * Returns the number of pairs in the dictionary.
+     * Number of entries in the dictionary.
      */
     public function count(): int
     {
@@ -186,28 +209,52 @@ final class Dictionary implements IArray
     }
 
     /**
-     * Returns the dictionary as a native array keyed by the key hash.
-     * The original key objects are available via iteration; toArray() focuses on values.
+     * Returns a native array indexed by the key hashes with raw values.
      *
-     * @return array<string, V>
+     * Note: Keys are not preserved here; iteration preserves original keys.
+     *
+     * @return array<string, array{key: TKey, value: TValue}>
      */
     public function toArray(): array
     {
-        $result = [];
-        foreach ($this->value->toArray() as $hash => $pair) {
-            $result[$hash] = $pair['value'];
-        }
-
-        return $result;
+        return $this->value->toArray();
     }
 
     /**
-     * Returns the internal ArrayValue wrapper containing normalized storage.
+     * Returns the underlying ArrayValue storage.
      *
-     * @return ArrayValue<array<string, array{key: K, value: V}>>
+     * @return ArrayValue<array<string, array{key: TKey, value: TValue}>>
      */
     public function toArrayValue(): ArrayValue
     {
         return $this->value;
+    }
+
+    /**
+     * The expected key type of this dictionary.
+     *
+     * @return non-empty-string
+     */
+    public function keyType(): string
+    {
+        return $this->keyType;
+    }
+
+    /**
+     * The expected value type of this dictionary.
+     *
+     * @return non-empty-string
+     */
+    public function valueType(): string
+    {
+        return $this->valueType;
+    }
+
+    /**
+     * Whether the dictionary contains no entries.
+     */
+    public function isEmpty(): bool
+    {
+        return $this->value->isEmpty();
     }
 }

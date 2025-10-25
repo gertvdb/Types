@@ -23,7 +23,7 @@ use function Gertvdb\Types\isOfType;
  * @template T
  * @implements IArray<T>
  */
-final readonly class ListValue implements IArray
+final class ListValue implements IArray
 {
     /**
      * Internal storage of the values.
@@ -37,26 +37,15 @@ final readonly class ListValue implements IArray
      *
      * @var string
      */
-    private string $type;
+    public readonly string $type;
 
     /**
-     * @param list<T> $value Values to initialize the list with. Keys will be reindexed to be sequential.
      * @param string $type  Type of all elements (e.g. 'int', 'string', MyClass::class)
      */
-    private function __construct(array $value, string $type)
+    private function __construct(string $type)
     {
         $this->type = $type;
-        $this->value = ArrayValue::fromArray(array_values($value)); // ensure sequential keys (list)
-
-        $iterator = $this->value->getIterator();
-        foreach ($iterator as $i => $item) {
-            if (!isOfType($item, $type)) {
-                $actual = get_debug_type($item);
-                throw new InvalidArgumentException(
-                    "Invalid type at index {$i}: expected {$type}, got {$actual}."
-                );
-            }
-        }
+        $this->value = ArrayValue::fromArray([]);
     }
 
     /**
@@ -67,20 +56,7 @@ final readonly class ListValue implements IArray
      */
     public static function empty(string $type): self
     {
-        return new self([], $type);
-    }
-
-    /**
-     * Create a typed list from a native PHP array.
-     * Keys will be reindexed to be sequential (list semantics).
-     *
-     * @param list<T> $value
-     * @param string $type
-     * @return self<T>
-     */
-    public static function fromArray(array $value, string $type): self
-    {
-        return new self($value, $type);
+        return new self($type);
     }
 
     /**
@@ -98,9 +74,13 @@ final readonly class ListValue implements IArray
             );
         }
 
-        $items = $this->value->toArray();
-        $items[] = $item;
-        return new self($items, $this->type);
+        $new = clone $this;
+
+        $data = $this->value->toArray();
+        $data[] = $item;
+
+        $new->value = ArrayValue::fromArray($data);
+        return $new;
     }
 
     /**
@@ -142,19 +122,11 @@ final readonly class ListValue implements IArray
      */
     public function map(callable $callback): self
     {
-        $new = array_map($callback, $this->value->toArray());
+        $values = $this->value->map($callback);
 
-        // Validate type after mapping
-        foreach ($new as $i => $item) {
-            if (!isOfType($item, $this->type)) {
-                $actual = get_debug_type($item);
-                throw new InvalidArgumentException(
-                    "Invalid type at index {$i} after map: expected {$this->type}, got {$actual}."
-                );
-            }
-        }
-
-        return new self($new, $this->type);
+        $new = clone $this;
+        $new->value = $values;
+        return $new;
     }
 
     /**
@@ -165,7 +137,11 @@ final readonly class ListValue implements IArray
      */
     public function filter(callable $callback): self
     {
-        return new self(array_values($this->value->filter($callback)->toArray()), $this->type);
+        $values = $this->value->filter($callback);
+
+        $new = clone $this;
+        $new->value = $values;
+        return $new;
     }
 
     /**
@@ -177,7 +153,7 @@ final readonly class ListValue implements IArray
      */
     public function reduce(callable $callback, mixed $initial = null): mixed
     {
-        return $this->value->reduce($callback, $initial);
+        return $this->value->reduce($callback);
     }
 
     /**
@@ -267,19 +243,13 @@ final readonly class ListValue implements IArray
      */
     public function merge(ArrayValue|array $other): self
     {
-        $values = $other instanceof ArrayValue ? $other->toArray() : $other;
+        $mergeValues = $other instanceof ArrayValue ? $other->toArray() : $other;
 
-        $merged = $this->value->merge($values)->toArray();
-        foreach ($merged as $i => $item) {
-            if (!isOfType($item, $this->type)) {
-                $actual = get_debug_type($item);
-                throw new InvalidArgumentException(
-                    "Invalid type in merge at index {$i}: expected {$this->type}, got {$actual}."
-                );
-            }
-        }
+        $values = $this->value->merge($mergeValues);
 
-        return new self($merged, $this->type);
+        $new = clone $this;
+        $new->value = $values;
+        return $new;
     }
 
     /**
@@ -289,8 +259,10 @@ final readonly class ListValue implements IArray
      */
     public function reverse(): self
     {
-        $reversed = $this->value->reverse()->toArray();
-        return new self($reversed, $this->type);
+        $values = $this->value->reverse();
+        $new = clone $this;
+        $new->value = $values;
+        return $new;
     }
 
     /**
